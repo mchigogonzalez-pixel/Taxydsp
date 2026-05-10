@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>TaxiDSP</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TaxiDSP">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --negro: #0a0a0a;
+  --carbon: #111;
+  --grafito: #181818;
+  --borde: #252525;
+  --verde: #c8f135;
+  --verde-dim: #7a9e10;
+  --rojo: #ff3b3b;
+  --naranja: #ff8c00;
+  --azul: #4a9eff;
+  --blanco: #efefef;
+  --gris: #444;
+  --gris-claro: #777;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  max-width: 500px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+}
+
+/* ── HEADER ── */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--negro);
+  border-bottom: 1px solid var(--borde);
+  padding: 12px 16px 0;
+}
+
+.app-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--verde);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 0.65rem;
+  font-family: monospace;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--gris-claro);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.tab.activo {
+  color: var(--verde);
+  border-bottom-color: var(--verde);
+}
+
+/* ── PÁGINAS ── */
+.pagina { display: none; padding: 14px 16px; }
+.pagina.activa { display: block; }
+
+/* ── COMPONENTES COMUNES ── */
+.seccion {
+  background: var(--grafito);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.sec-titulo {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gris-claro);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.sec-titulo::before {
+  content: '';
+  display: block;
+  width: 3px; height: 11px;
+  background: var(--verde);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.campo { margin-bottom: 10px; }
+
+.campo label {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--gris-claro);
+  margin-bottom: 4px;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.f3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+
+input, select {
+  width: 100%;
+  background: var(--carbon);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 10px;
+  color: var(--blanco);
+  font-family: monospace;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+}
+
+input:focus { border-color: var(--verde-dim); }
+input::placeholder { color: var(--gris); }
+
+.btn-verde {
+  width: 100%;
+  background: var(--verde);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin: 10px 0 8px;
+  text-transform: uppercase;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-verde:active { transform: scale(0.98); opacity: 0.85; }
+
+.btn-mini {
+  background: none;
+  border: 1px solid var(--borde);
+  color: var(--gris-claro);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 0.65rem;
+  font-family: monospace;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.btn-mini-verde {
+  background: rgba(200,241,53,0.07);
+  border: 1px solid var(--verde-dim);
+  color: var(--verde);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 0.65rem;
+  font-family: monospace;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.badge-costo {
+  background: var(--carbon);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--gris-claro);
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.badge-costo b { color: var(--naranja); }
+
+/* ── RESULTADO INDRIVER ── */
+.resultado {
+  background: var(--carbon);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 10px;
+  text-align: center;
+  display: none;
+}
+
+.resultado.visible { display: block; }
+
+.res-label {
+  font-family: monospace;
+  font-size: 0.58rem;
+  color: var(--gris-claro);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.res-monto {
+  font-size: 3.2rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.res-monto.ok  { color: var(--verde); }
+.res-monto.mal { color: var(--rojo); }
+.res-monto.meh { color: var(--naranja); }
+
+.res-veredicto {
+  font-size: 0.7rem;
+  font-family: monospace;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.v-ok  { background: rgba(200,241,53,0.1); color: var(--verde); }
+.v-mal { background: rgba(255,59,59,0.1);  color: var(--rojo); }
+.v-meh { background: rgba(255,140,0,0.1);  color: var(--naranja); }
+
+.res-metricas {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  border-top: 1px solid var(--borde);
+  padding-top: 10px;
+}
+
+.metrica { text-align: center; }
+.metrica .val { font-size: 1.3rem; font-weight: 900; line-height: 1; }
+.metrica .etq { font-family: monospace; font-size: 0.55rem; color: var(--gris-claro); margin-top: 2px; }
+
+/* ── DESGLOSE ── */
+.desglose {
+  background: var(--grafito);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: none;
+}
+
+.desglose.visible { display: block; }
+
+.d-fila {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.d-fila:last-child { border-bottom: none; }
+.d-fila .con { color: var(--gris-claro); font-family: monospace; font-size: 0.68rem; }
+.d-fila .val { font-family: monospace; color: var(--rojo); font-size: 0.78rem; }
+.d-fila.d-tar .val { color: var(--verde); }
+.d-fila.d-tot .val { color: var(--naranja); font-weight: 700; }
+
+.barra-wrap { margin-top: 10px; }
+.barra-labels { display:flex; justify-content:space-between; font-family:monospace; font-size:0.58rem; color:var(--gris-claro); margin-bottom:4px; }
+.barra-track { background:var(--borde); border-radius:4px; height:6px; overflow:hidden; }
+.barra-fill  { height:100%; border-radius:4px; transition:width 0.5s ease; }
+
+/* ── RESUMEN TURNO ── */
+.resumen-turno {
+  background: var(--grafito);
+  border: 1px solid var(--verde-dim);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: none;
+}
+
+.resumen-turno.visible { display: block; }
+
+.res-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.res-dato {
+  background: var(--carbon);
+  border-radius: 8px;
+  padding: 9px 5px;
+  text-align: center;
+}
+
+.res-dato .num { font-size: 1.4rem; font-weight: 900; line-height: 1; }
+.res-dato .etq { font-family: monospace; font-size: 0.52rem; color: var(--gris-claro); margin-top: 3px; }
+
+/* ── HISTORIAL ── */
+.hist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.viaje-item {
+  background: var(--carbon);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(-4px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.v-info { flex:1; min-width:0; }
+.v-ruta { font-size:0.72rem; color:var(--gris-claro); font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px; }
+.v-meta { font-size:0.62rem; color:var(--gris); font-family:monospace; }
+.v-neto { font-size:1.25rem; font-weight:900; text-align:right; flex-shrink:0; margin-left:10px; }
+
+.sin-datos { text-align:center; padding:20px; color:var(--gris); font-family:monospace; font-size:0.7rem; }
+
+/* ── ANALIZADOR ── */
+.zona-carga {
+  border: 2px dashed var(--borde);
+  border-radius: 12px;
+  padding: 28px 16px;
+  text-align: center;
+  margin-bottom: 12px;
+  cursor: pointer;
+  background: var(--grafito);
+  transition: border-color 0.2s;
+}
+
+.zona-carga:hover, .zona-carga.drag { border-color: var(--verde-dim); }
+.zona-carga .icono { font-size: 1.8rem; margin-bottom: 8px; opacity: 0.6; }
+.zona-carga p { font-size: 0.72rem; color: var(--gris-claro); line-height: 1.6; }
+.zona-carga b { color: var(--verde); }
+
+input[type=file] { display: none; }
+
+.mapeo { display: none; margin-bottom: 10px; }
+.mapeo.visible { display: block; }
+
+.mapeo-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.mapeo-fila label { font-size: 0.65rem; color: var(--gris-claro); font-family: monospace; }
+
+.btn-analizar { display: none; margin-bottom: 10px; }
+.btn-analizar.visible { display: block; }
+
+#resultadosZ { display: none; }
+#resultadosZ.visible { display: block; }
+
+.tarjetas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tarjeta {
+  background: var(--grafito);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.tarjeta .num { font-size: 1.8rem; font-weight: 900; line-height: 1; color: var(--verde); }
+.tarjeta .etq { font-family: monospace; font-size: 0.55rem; color: var(--gris-claro); margin-top: 4px; letter-spacing: 1px; }
+
+.calor-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.calor-celda { border-radius: 5px; padding: 5px 2px; text-align: center; }
+.calor-celda .ch { font-weight: 900; font-size: 0.72rem; }
+.calor-celda .cn { font-size: 0.52rem; color: rgba(255,255,255,0.45); margin-top: 1px; }
+
+.pico-badge {
+  display: inline-block;
+  background: rgba(200,241,53,0.1);
+  border: 1px solid var(--verde-dim);
+  color: var(--verde);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  margin: 3px 3px 0 0;
+  font-family: monospace;
+}
+
+.col-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.col-item:last-child { border-bottom: none; }
+.col-nombre { font-size: 0.78rem; font-weight: 700; }
+.col-count  { font-size: 1.1rem; font-weight: 900; color: var(--verde); margin-left: 10px; }
+.col-barra-wrap { margin-top: 3px; height: 3px; background: var(--borde); border-radius: 2px; overflow: hidden; }
+.col-barra { height: 100%; border-radius: 2px; background: var(--verde); }
+
+.tabla-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
+th { text-align: left; padding: 5px 7px; font-size: 0.57rem; color: var(--gris-claro); letter-spacing: 1px; border-bottom: 1px solid var(--borde); text-transform: uppercase; white-space: nowrap; }
+td { padding: 6px 7px; border-bottom: 1px solid var(--borde); vertical-align: top; line-height: 1.3; }
+tr:last-child td { border-bottom: none; }
+
+td.t-hora { font-weight: 900; color: var(--verde); white-space: nowrap; }
+td.t-col  { color: var(--blanco); font-weight: 600; white-space: nowrap; }
+td.t-dir  { color: var(--gris-claro); font-size: 0.62rem; max-width: 140px; }
+td.t-uni  { color: var(--azul); white-space: nowrap; }
+tr.pico td { background: rgba(200,241,53,0.03); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  background: var(--verde);
+  color: #000;
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  font-family: monospace;
+  transition: transform 0.3s ease;
+  z-index: 999;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">OK</div>
+
+<!-- HEADER + TABS -->
+<div class="app-header">
+  <div class="app-title">TaxiDSP</div>
+  <div class="tabs">
+    <div class="tab activo" onclick="irA('indriver')">InDriver</div>
+    <div class="tab" onclick="irA('zello')">Zello</div>
+    <div class="tab" onclick="irA('config')">Config</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PESTAÑA 1: INDRIVER
+════════════════════════════════ -->
+<div class="pagina activa" id="pg-indriver">
+
+  <div class="seccion">
+    <div class="sec-titulo">Registrar viaje</div>
+    <div class="campo">
+      <label>Origen a Destino</label>
+      <input type="text" id="ruta" placeholder="Flores del Valle a Bonfil" inputmode="text">
+    </div>
+    <div class="f2">
+      <div class="campo">
+        <label>Tarifa ($)</label>
+        <input type="number" id="tarifa" placeholder="94" inputmode="numeric">
+      </div>
+      <div class="campo">
+        <label>Km viaje (A-B)</label>
+        <input type="number" id="kmViaje" placeholder="1.1" step="0.1" inputmode="decimal">
+      </div>
+    </div>
+    <div class="f3">
+      <div class="campo">
+        <label>Km recogida</label>
+        <input type="number" id="kmRecogida" value="0" step="0.1" inputmode="decimal">
+      </div>
+      <div class="campo">
+        <label>Min recogida</label>
+        <input type="number" id="minRecogida" value="0" inputmode="numeric">
+      </div>
+      <div class="campo">
+        <label>Min viaje</label>
+        <input type="number" id="minViaje" placeholder="18" inputmode="numeric">
+      </div>
+    </div>
+    <div class="f2">
+      <div class="campo">
+        <label>Pago</label>
+        <select id="tipoPago">
+          <option value="efectivo">Efectivo</option>
+          <option value="spei">SPEI</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Servicio</label>
+        <select id="tipoServicio">
+          <option value="normal">Normal</option>
+          <option value="plus">Viaje+</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-verde" onclick="calcular()">Calcular rentabilidad</button>
+
+  <!-- RESULTADO -->
+  <div class="resultado" id="resultado">
+    <div class="res-label">GANANCIA NETA DEL VIAJE</div>
+    <div class="res-monto" id="resMontoNeto">$0</div>
+    <div class="res-veredicto" id="resVeredicto">...</div>
+    <div class="res-metricas">
+      <div class="metrica">
+        <div class="val" id="resXhora" style="color:var(--naranja)">-</div>
+        <div class="etq">$/HORA</div>
+      </div>
+      <div class="metrica">
+        <div class="val" id="resXkm" style="color:var(--naranja)">-</div>
+        <div class="etq">$/KM NETO</div>
+      </div>
+      <div class="metrica">
+        <div class="val" id="resTiempo" style="color:var(--gris-claro)">-</div>
+        <div class="etq">TIEMPO</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESGLOSE -->
+  <div class="desglose" id="desglose">
+    <div class="sec-titulo">Desglose</div>
+    <div class="d-fila d-tar"><span class="con">TARIFA</span><span class="val" id="dTarifa">-</span></div>
+    <div class="d-fila"><span class="con">GASOLINA</span><span class="val" id="dGas">-</span></div>
+    <div class="d-fila"><span class="con">DESGASTE</span><span class="val" id="dDesgaste">-</span></div>
+    <div class="d-fila"><span class="con">PERSONAL</span><span class="val" id="dPersonal">-</span></div>
+    <div class="d-fila d-tot"><span class="con">COSTO TOTAL</span><span class="val" id="dTotal">-</span></div>
+    <div class="barra-wrap">
+      <div class="barra-labels"><span>0%</span><span id="barraPct">-</span><span>100%</span></div>
+      <div class="barra-track"><div class="barra-fill" id="barraFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- RESUMEN TURNO -->
+  <div class="resumen-turno" id="resumenTurno">
+    <div class="sec-titulo">Resumen del turno</div>
+    <div class="res-grid">
+      <div class="res-dato"><div class="num" id="rViajes" style="color:var(--verde)">0</div><div class="etq">VIAJES</div></div>
+      <div class="res-dato"><div class="num" id="rNeto" style="color:var(--verde)">$0</div><div class="etq">NETO TOTAL</div></div>
+      <div class="res-dato"><div class="num" id="rMejor" style="color:var(--verde)">$0</div><div class="etq">MEJOR</div></div>
+      <div class="res-dato"><div class="num" id="rPromedio" style="color:var(--naranja)">$0</div><div class="etq">PROM/VIAJE</div></div>
+      <div class="res-dato"><div class="num" id="rXhora" style="color:var(--naranja)">-</div><div class="etq">$/HORA PROM</div></div>
+      <div class="res-dato"><div class="num" id="rKm" style="color:var(--gris-claro)">0</div><div class="etq">KM TOTALES</div></div>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="seccion">
+    <div class="hist-header">
+      <div class="sec-titulo" style="margin-bottom:0">Historial</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-mini-verde" onclick="exportarCSV()">CSV</button>
+        <button class="btn-mini" onclick="limpiarTurno()">Limpiar</button>
+      </div>
+    </div>
+    <div id="historialLista"><div class="sin-datos">sin viajes registrados</div></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════
+     PESTAÑA 2: ZELLO ANALIZADOR
+════════════════════════════════ -->
+<div class="pagina" id="pg-zello">
+
+  <div class="zona-carga" id="zonaCarga" onclick="document.getElementById('fileCSV').click()">
+    <div class="icono">📋</div>
+    <p>Toca para cargar el <b>CSV de Despacho2</b></p>
+  </div>
+  <input type="file" id="fileCSV" accept=".csv,.txt">
+
+  <!-- MAPEO -->
+  <div class="seccion mapeo" id="mapeo">
+    <div class="sec-titulo">Columnas del CSV</div>
+    <div class="mapeo-fila">
+      <label>Hora / Timestamp</label>
+      <select id="colHora"></select>
+    </div>
+    <div class="mapeo-fila">
+      <label>Colonia / Zona</label>
+      <select id="colColonia"></select>
+    </div>
+    <div class="mapeo-fila">
+      <label>Direccion</label>
+      <select id="colDireccion"></select>
+    </div>
+    <div class="mapeo-fila">
+      <label>Unidad (opcional)</label>
+      <select id="colUnidad"></select>
+    </div>
+  </div>
+
+  <button class="btn-verde btn-analizar" id="btnAnalizar" onclick="analizar()">Analizar turno</button>
+
+  <div id="resultadosZ">
+
+    <div class="tarjetas">
+      <div class="tarjeta"><div class="num" id="zTotal">0</div><div class="etq">Voceadas totales</div></div>
+      <div class="tarjeta"><div class="num" id="zColonias">0</div><div class="etq">Colonias activas</div></div>
+      <div class="tarjeta"><div class="num" id="zHoraPico" style="font-size:1.3rem">-</div><div class="etq">Hora pico</div></div>
+      <div class="tarjeta"><div class="num" id="zZonaPico" style="font-size:0.95rem;color:var(--naranja)">-</div><div class="etq">Zona mas activa</div></div>
+    </div>
+
+    <div class="seccion">
+      <div class="sec-titulo">Calor por hora</div>
+      <div class="calor-grid" id="calorGrid"></div>
+      <div style="margin-top:10px;">
+        <div style="font-size:0.58rem;color:var(--gris-claro);margin-bottom:5px;letter-spacing:1px;">HORAS PICO</div>
+        <div id="picosBadges"></div>
+      </div>
+    </div>
+
+    <div class="seccion">
+      <div class="sec-titulo">Ranking de zonas</div>
+      <div id="rankingZonas"></div>
+    </div>
+
+    <div class="seccion">
+      <div class="sec-titulo">Historial completo</div>
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Hora</th><th>Colonia</th><th>Direccion</th><th>Unidad</th></tr></thead>
+          <tbody id="tablaZello"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PESTAÑA 3: CONFIG
+════════════════════════════════ -->
+<div class="pagina" id="pg-config">
+
+  <div class="seccion">
+    <div class="sec-titulo">Costos del Versa (con A/C)</div>
+    <div class="f2">
+      <div class="campo">
+        <label>Gasolina ($/litro)</label>
+        <input type="number" id="precioGas" value="25" step="0.5" inputmode="decimal">
+      </div>
+      <div class="campo">
+        <label>Rendimiento (km/l)</label>
+        <input type="number" id="rendimiento" value="13" step="0.5" inputmode="decimal">
+      </div>
+    </div>
+    <div class="f2">
+      <div class="campo">
+        <label>Km por turno</label>
+        <input type="number" id="kmTurno" value="90" inputmode="numeric">
+      </div>
+      <div class="campo">
+        <label>Gasto personal/turno ($)</label>
+        <input type="number" id="gastoPersonal" value="170" inputmode="numeric">
+      </div>
+    </div>
+    <div class="badge-costo">
+      <span>Costo real / km:</span>
+      <b id="costoKmDisplay">calculando...</b>
+    </div>
+  </div>
+
+  <div class="seccion">
+    <div class="sec-titulo">Umbrales de rentabilidad</div>
+    <div class="f2">
+      <div class="campo">
+        <label>Neto minimo rentable ($)</label>
+        <input type="number" id="umbralRentable" value="20" inputmode="numeric">
+      </div>
+      <div class="campo">
+        <label>$/hora minimo objetivo</label>
+        <input type="number" id="umbralHora" value="150" inputmode="numeric">
+      </div>
+    </div>
+    <div style="font-size:0.65rem;color:var(--gris-claro);font-family:monospace;margin-top:4px;">
+      Verde = supera umbral · Naranja = justo · Rojo = por debajo
+    </div>
+  </div>
+
+  <div class="seccion">
+    <div class="sec-titulo">Zona de operacion</div>
+    <div class="campo">
+      <label>Base principal</label>
+      <input type="text" id="zonaBase" value="Vegas de Veracruz" inputmode="text">
+    </div>
+    <div class="campo">
+      <label>Radio de influencia (km)</label>
+      <input type="number" id="radioInfluencia" value="2.5" step="0.5" inputmode="decimal">
+    </div>
+  </div>
+
+  <button class="btn-verde" onclick="guardarConfig()">Guardar configuracion</button>
+
+  <div class="seccion" style="margin-top:4px;">
+    <div class="sec-titulo">Datos</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-mini-verde" onclick="exportarCSV()">Exportar historial CSV</button>
+      <button class="btn-mini" onclick="limpiarTodo()">Borrar todo</button>
+    </div>
+    <div style="font-size:0.6rem;color:var(--gris);font-family:monospace;margin-top:8px;">
+      v3.0 · Offline · localStorage
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════
+const COSTO_FIJO_KM = 3.30;
+let viajes = [];
+let csvData = [], csvHeaders = [];
+
+function $$(x) { return document.getElementById(x); }
+
+// ════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════
+function irA(pg) {
+  document.querySelectorAll('.pagina').forEach(p => p.classList.remove('activa'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+  $$('pg-' + pg).classList.add('activa');
+  const tabs = { indriver: 0, zello: 1, config: 2 };
+  document.querySelectorAll('.tab')[tabs[pg]].classList.add('activo');
+  window.scrollTo(0, 0);
+}
+
+// ════════════════════════════════
+// PERSISTENCIA
+// ════════════════════════════════
+function guardar() {
+  try {
+    localStorage.setItem('tdsp_viajes', JSON.stringify(viajes));
+    localStorage.setItem('tdsp_cfg', JSON.stringify({
+      gas:  $$('precioGas').value,
+      rend: $$('rendimiento').value,
+      km:   $$('kmTurno').value,
+      per:  $$('gastoPersonal').value,
+      ur:   $$('umbralRentable').value,
+      uh:   $$('umbralHora').value,
+      zb:   $$('zonaBase').value,
+      ri:   $$('radioInfluencia').value
+    }));
+  } catch(e) {}
+}
+
+function cargar() {
+  try {
+    const v = localStorage.getItem('tdsp_viajes');
+    if (v) viajes = JSON.parse(v);
+    const c = localStorage.getItem('tdsp_cfg');
+    if (c) {
+      const cfg = JSON.parse(c);
+      if (cfg.gas)  $$('precioGas').value       = cfg.gas;
+      if (cfg.rend) $$('rendimiento').value      = cfg.rend;
+      if (cfg.km)   $$('kmTurno').value          = cfg.km;
+      if (cfg.per)  $$('gastoPersonal').value    = cfg.per;
+      if (cfg.ur)   $$('umbralRentable').value   = cfg.ur;
+      if (cfg.uh)   $$('umbralHora').value       = cfg.uh;
+      if (cfg.zb)   $$('zonaBase').value         = cfg.zb;
+      if (cfg.ri)   $$('radioInfluencia').value  = cfg.ri;
+    }
+  } catch(e) {}
+}
+
+function guardarConfig() {
+  guardar();
+  refCosto();
+  toast('CONFIG GUARDADA');
+}
+
+function limpiarTodo() {
+  if (!confirm('Borrar todos los datos?\nExporta el CSV primero.')) return;
+  viajes = [];
+  localStorage.removeItem('tdsp_viajes');
+  refHistorial();
+  $$('resultado').classList.remove('visible');
+  $$('desglose').classList.remove('visible');
+  toast('DATOS BORRADOS');
+}
+
+// ════════════════════════════════
+// CONFIG / COSTO KM
+// ════════════════════════════════
+function costoKm() {
+  const gas  = +$$('precioGas').value    || 25;
+  const rend = +$$('rendimiento').value  || 13;
+  const km   = +$$('kmTurno').value      || 90;
+  const per  = +$$('gastoPersonal').value|| 170;
+  return (gas / rend) + COSTO_FIJO_KM + (per / km);
+}
+
+function refCosto() {
+  $$('costoKmDisplay').textContent = '$' + costoKm().toFixed(2);
+  guardar();
+}
+
+document.querySelectorAll('input[type=number]').forEach(el =>
+  el.addEventListener('input', () => { refCosto(); })
+);
+
+// ════════════════════════════════
+// INDRIVER - CALCULAR
+// ════════════════════════════════
+function calcular() {
+  const tarifa = +$$('tarifa').value;
+  const kmV    = +$$('kmViaje').value;
+  if (!tarifa || !kmV) { alert('Ingresa tarifa y km del viaje'); return; }
+
+  const kmR  = +$$('kmRecogida').value  || 0;
+  const minR = +$$('minRecogida').value || 0;
+  const minV = +$$('minViaje').value    || 0;
+  const ruta = $$('ruta').value.trim()  || 'Sin ruta';
+  const pago = $$('tipoPago').value;
+  const serv = $$('tipoServicio').value;
+
+  const gas  = +$$('precioGas').value    || 25;
+  const rend = +$$('rendimiento').value  || 13;
+  const km   = +$$('kmTurno').value      || 90;
+  const per  = +$$('gastoPersonal').value|| 170;
+  const uR   = +$$('umbralRentable').value || 20;
+  const uH   = +$$('umbralHora').value     || 150;
+
+  const kmT  = kmV + kmR;
+  const minT = minV + minR;
+  const cGas = (gas / rend) * kmT;
+  const cDes = COSTO_FIJO_KM * kmT;
+  const cPer = (per / km) * kmT;
+  const cTot = cGas + cDes + cPer;
+  const neto = tarifa - cTot;
+  const pct  = Math.min(Math.max((neto / tarifa) * 100, 0), 100);
+  const xh   = minT > 0 ? (neto / minT) * 60 : null;
+  const xkm  = kmT  > 0 ?  neto / kmT        : null;
+  const hora = new Date().toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  // RESULTADO
+  $$('resultado').classList.add('visible');
+  const mEl = $$('resMontoNeto');
+  const vEl = $$('resVeredicto');
+  mEl.textContent = (neto >= 0 ? '+' : '') + '$' + neto.toFixed(0);
+
+  if (neto > uR) {
+    mEl.className = 'res-monto ok';
+    vEl.textContent = 'VIAJE RENTABLE';
+    vEl.className = 'res-veredicto v-ok';
+  } else if (neto >= 0) {
+    mEl.className = 'res-monto meh';
+    vEl.textContent = 'APENAS CUBRE COSTOS';
+    vEl.className = 'res-veredicto v-meh';
+  } else {
+    mEl.className = 'res-monto mal';
+    vEl.textContent = 'PERDIDA - NO VALIO';
+    vEl.className = 'res-veredicto v-mal';
+  }
+
+  const xhEl = $$('resXhora'), xkEl = $$('resXkm'), ttEl = $$('resTiempo');
+  if (xh !== null) {
+    xhEl.textContent = '$' + xh.toFixed(0);
+    xhEl.style.color = xh > uH ? 'var(--verde)' : xh > uH*0.5 ? 'var(--naranja)' : 'var(--rojo)';
+  } else xhEl.textContent = '-';
+  if (xkm !== null) {
+    xkEl.textContent = '$' + xkm.toFixed(1);
+    xkEl.style.color = xkm > 10 ? 'var(--verde)' : xkm > 0 ? 'var(--naranja)' : 'var(--rojo)';
+  } else xkEl.textContent = '-';
+  ttEl.textContent = minT > 0 ? minT + 'min' : '-';
+
+  // DESGLOSE
+  $$('desglose').classList.add('visible');
+  $$('dTarifa').textContent   = '+$' + tarifa.toFixed(2);
+  $$('dGas').textContent      = '-$' + cGas.toFixed(2);
+  $$('dDesgaste').textContent = '-$' + cDes.toFixed(2);
+  $$('dPersonal').textContent = '-$' + cPer.toFixed(2);
+  $$('dTotal').textContent    = '-$' + cTot.toFixed(2);
+  const col = neto > uR ? 'var(--verde)' : neto >= 0 ? 'var(--naranja)' : 'var(--rojo)';
+  $$('barraFill').style.width      = pct + '%';
+  $$('barraFill').style.background = col;
+  $$('barraPct').textContent       = pct.toFixed(0) + '% margen';
+
+  viajes.push({ hora, ruta, tarifa, kmT, minT, cTot, neto, xh, pago, serv });
+  guardar();
+  refHistorial();
+  toast('GUARDADO');
+
+  ['tarifa','kmViaje','minViaje','ruta'].forEach(f => $$(f).value = '');
+  $$('kmRecogida').value = '0';
+  $$('minRecogida').value = '0';
+}
+
+// ════════════════════════════════
+// INDRIVER - HISTORIAL
+// ════════════════════════════════
+function refHistorial() {
+  const lista = $$('historialLista');
+  if (!viajes.length) {
+    lista.innerHTML = '<div class="sin-datos">sin viajes registrados</div>';
+    $$('resumenTurno').classList.remove('visible');
+    return;
+  }
+
+  const totNeto  = viajes.reduce((a, v) => a + v.neto, 0);
+  const mejor    = Math.max(...viajes.map(v => v.neto));
+  const prom     = totNeto / viajes.length;
+  const kmAc     = viajes.reduce((a, v) => a + v.kmT, 0);
+  const conT     = viajes.filter(v => v.minT > 0 && v.xh !== null);
+  const promXh   = conT.length ? conT.reduce((a, v) => a + v.xh, 0) / conT.length : null;
+  const uH       = +$$('umbralHora').value || 150;
+
+  $$('resumenTurno').classList.add('visible');
+  $$('rViajes').textContent   = viajes.length;
+  $$('rNeto').textContent     = '$' + totNeto.toFixed(0);
+  $$('rNeto').style.color     = totNeto >= 0 ? 'var(--verde)' : 'var(--rojo)';
+  $$('rMejor').textContent    = '$' + mejor.toFixed(0);
+  $$('rPromedio').textContent = '$' + prom.toFixed(0);
+  $$('rPromedio').style.color = prom > 15 ? 'var(--verde)' : prom >= 0 ? 'var(--naranja)' : 'var(--rojo)';
+  $$('rKm').textContent       = kmAc.toFixed(1);
+
+  const xhEl = $$('rXhora');
+  if (promXh !== null) {
+    xhEl.textContent  = '$' + promXh.toFixed(0);
+    xhEl.style.color  = promXh > uH ? 'var(--verde)' : promXh > uH * 0.5 ? 'var(--naranja)' : 'var(--rojo)';
+  } else xhEl.textContent = '-';
+
+  lista.innerHTML = [...viajes].reverse().map(v => {
+    const c  = v.neto > 20 ? 'var(--verde)' : v.neto >= 0 ? 'var(--naranja)' : 'var(--rojo)';
+    const s  = v.neto >= 0 ? '+' : '';
+    const p  = v.pago === 'spei' ? '[SPEI]' : '[EFE]';
+    const pl = v.serv === 'plus' ? ' ★' : '';
+    const xh = v.xh ? ' · $' + v.xh.toFixed(0) + '/h' : '';
+    const mn = v.minT > 0 ? ' · ' + v.minT + 'min' : '';
+    return `<div class="viaje-item">
+      <div class="v-info">
+        <div class="v-ruta">${p}${pl} ${v.ruta}</div>
+        <div class="v-meta">${v.hora} · ${v.kmT.toFixed(1)}km${mn}${xh}</div>
+      </div>
+      <div class="v-neto" style="color:${c}">${s}$${v.neto.toFixed(0)}</div>
+    </div>`;
+  }).join('');
+}
+
+function exportarCSV() {
+  if (!viajes.length) { alert('No hay viajes para exportar'); return; }
+  const fecha = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+  const cab   = 'Hora,Ruta,Tarifa,KmTotal,MinTotal,Costo,Neto,$/Hora,Pago,Servicio';
+  const rows  = viajes.map(v => [
+    v.hora, '"' + v.ruta + '"', v.tarifa.toFixed(2), v.kmT.toFixed(1),
+    v.minT, v.cTot.toFixed(2), v.neto.toFixed(2),
+    v.xh ? v.xh.toFixed(0) : '', v.pago, v.serv
+  ].join(','));
+  const csv = [cab, ...rows].join('\n');
+  const a   = document.createElement('a');
+  a.href    = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = 'taxidsp_' + fecha + '.csv';
+  a.click();
+  toast('CSV DESCARGADO');
+}
+
+function limpiarTurno() {
+  if (!viajes.length) return;
+  if (confirm('Limpiar viajes del turno?\nExporta CSV primero.')) {
+    viajes = [];
+    guardar();
+    refHistorial();
+    $$('resultado').classList.remove('visible');
+    $$('desglose').classList.remove('visible');
+  }
+}
+
+// ════════════════════════════════
+// ZELLO ANALIZADOR
+// ════════════════════════════════
+const zona = $$('zonaCarga');
+zona.addEventListener('dragover', e => { e.preventDefault(); zona.classList.add('drag'); });
+zona.addEventListener('dragleave', () => zona.classList.remove('drag'));
+zona.addEventListener('drop', e => { e.preventDefault(); zona.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) leerCSV(f); });
+$$('fileCSV').addEventListener('change', e => { if (e.target.files[0]) leerCSV(e.target.files[0]); });
+
+function leerCSV(file) {
+  const reader = new FileReader();
+  reader.onload = e => parsearCSV(e.target.result, file.name);
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parsearCSV(texto, nombre) {
+  const lineas = texto.trim().split('\n').filter(l => l.trim());
+  if (lineas.length < 2) { alert('Archivo vacio o invalido'); return; }
+
+  const sep = lineas[0].includes('\t') ? '\t' : lineas[0].includes(';') ? ';' : ',';
+  csvHeaders = lineas[0].split(sep).map(h => h.trim().replace(/"/g, ''));
+  csvData    = lineas.slice(1).map(l => l.split(sep).map(c => c.trim().replace(/"/g, ''))).filter(r => r.some(c => c));
+
+  const opts = ['(ninguna)', ...csvHeaders].map((h, i) => `<option value="${i-1}">${h}</option>`).join('');
+  ['colHora','colColonia','colDireccion','colUnidad'].forEach(s => { $$(s).innerHTML = opts; });
+
+  // Autodetectar
+  const kw = {
+    colHora:      ['hora','time','timestamp','fecha'],
+    colColonia:   ['colonia','zona','area','sector','lugar'],
+    colDireccion: ['direccion','address','dir','calle','domicilio'],
+    colUnidad:    ['unidad','unit','taxi','vehiculo','numero']
+  };
+  Object.entries(kw).forEach(([sel, words]) => {
+    const idx = csvHeaders.findIndex(h => words.some(w => h.toLowerCase().includes(w)));
+    if (idx >= 0) $$(sel).value = idx;
+  });
+
+  $$('mapeo').classList.add('visible');
+  $$('btnAnalizar').classList.add('visible');
+  $$('resultadosZ').classList.remove('visible');
+  zona.innerHTML = `<div class="icono">✓</div><p><b>${nombre}</b><br>${csvData.length} registros listos</p>`;
+  toast('CSV CARGADO');
+}
+
+function getCol(s) { const v = parseInt($$(s).value); return v >= 0 ? v : null; }
+
+function analizar() {
+  const iH = getCol('colHora'), iC = getCol('colColonia');
+  const iD = getCol('colDireccion'), iU = getCol('colUnidad');
+  if (iH === null && iC === null) { alert('Selecciona al menos Hora o Colonia'); return; }
+
+  const regs = csvData.map(r => ({
+    hora:     iH !== null ? r[iH] || '' : '',
+    colonia:  iC !== null ? r[iC] || '' : '',
+    direccion:iD !== null ? r[iD] || '' : '',
+    unidad:   iU !== null ? r[iU] || '' : ''
+  })).filter(r => r.hora || r.colonia);
+
+  if (!regs.length) { alert('Sin registros validos'); return; }
+
+  // Por colonia
+  const porCol = {};
+  regs.forEach(r => { const c = r.colonia || 'Sin colonia'; porCol[c] = (porCol[c] || 0) + 1; });
+  const colRank = Object.entries(porCol).sort((a, b) => b[1] - a[1]);
+  const maxCol  = colRank[0]?.[1] || 1;
+
+  // Por hora
+  const porH = {};
+  regs.forEach(r => {
+    const m = r.hora.match(/(\d{1,2})[:h]/);
+    if (m) { const h = parseInt(m[1]); porH[h] = (porH[h] || 0) + 1; }
+  });
+  const hOrd   = Object.entries(porH).sort((a, b) => b[1] - a[1]);
+  const maxH   = hOrd[0]?.[1] || 1;
+  const hMin   = Math.min(...Object.keys(porH).map(Number));
+  const hMax   = Math.max(...Object.keys(porH).map(Number));
+  const picos  = hOrd.slice(0, 3).map(([h]) => h);
+
+  // TARJETAS
+  $$('zTotal').textContent   = regs.length;
+  $$('zColonias').textContent= colRank.length;
+  $$('zHoraPico').textContent= hOrd[0] ? hOrd[0][0] + ':00' : '-';
+  $$('zZonaPico').textContent= colRank[0]?.[0] || '-';
+
+  // CALOR
+  const cg = $$('calorGrid');
+  cg.innerHTML = '';
+  if (Object.keys(porH).length) {
+    for (let h = hMin; h <= hMax; h++) {
+      const cnt = porH[h] || 0;
+      const pct = cnt / maxH;
+      const ep  = picos.includes(String(h));
+      const bg  = ep ? `rgba(200,241,53,${0.12 + pct * 0.55})` : `rgba(255,255,255,${0.03 + pct * 0.1})`;
+      const col = ep ? 'var(--verde)' : 'var(--blanco)';
+      cg.innerHTML += `<div class="calor-celda" style="background:${bg}"><div class="ch" style="color:${col}">${h}h</div><div class="cn">${cnt}</div></div>`;
+    }
+  }
+
+  $$('picosBadges').innerHTML = picos.map(h => `<span class="pico-badge">${h}:00-${h}:59</span>`).join('') || '-';
+
+  // RANKING
+  $$('rankingZonas').innerHTML = colRank.map(([col, cnt]) => `
+    <div class="col-item">
+      <div style="flex:1;min-width:0;">
+        <div class="col-nombre">${col}</div>
+        <div class="col-barra-wrap"><div class="col-barra" style="width:${(cnt/maxCol)*100}%"></div></div>
+      </div>
+      <div class="col-count">${cnt}</div>
+    </div>`).join('');
+
+  // TABLA
+  $$('tablaZello').innerHTML = regs.map(r => {
+    const hora = r.hora.match(/\d{1,2}[:h]\d{0,2}/)?.[0] || r.hora;
+    const hNum = parseInt(hora.match(/\d{1,2}/)?.[0] || '-1');
+    const ep   = picos.includes(String(hNum));
+    return `<tr class="${ep ? 'pico' : ''}">
+      <td class="t-hora">${hora || '-'}</td>
+      <td class="t-col">${r.colonia || '-'}</td>
+      <td class="t-dir">${r.direccion || '-'}</td>
+      <td class="t-uni">${r.unidad || '-'}</td>
+    </tr>`;
+  }).join('');
+
+  $$('resultadosZ').classList.add('visible');
+  toast('ANALISIS LISTO');
+  setTimeout(() => $$('resultadosZ').scrollIntoView({ behavior: 'smooth' }), 100);
+}
+
+// ════════════════════════════════
+// TOAST
+// ════════════════════════════════
+function toast(msg) {
+  const t = $$('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+cargar();
+refCosto();
+refHistorial();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('SW registrado'))
+      .catch(e => console.log('SW error:', e));
+  });
+}
+</script>
+</body>
+</html>
