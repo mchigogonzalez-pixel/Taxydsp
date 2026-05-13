@@ -1,6 +1,6 @@
 {
-  "name": "taxydsp",
-  "short_name": "taxydsp",
+  "name": "TaxiDSP",
+  "short_name": "TaxiDSP",
   "description": "Rentabilidad InDriver + Analizador Zello",
   "start_url": "/taxydsp/",
   "scope": "/taxydsp/",
@@ -19,4 +19,7 @@
       "src": "/taxydsp/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable
+      "purpose": "any maskable"
+    }
+  ]
+}

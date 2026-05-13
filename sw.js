@@ -1,16 +1,14 @@
-const CACHE = 'taxidsp-v1';
+const CACHE = 'taxidsp-v4';
 const ARCHIVOS = [
-  '/TaxiDSP/',
-  '/TaxiDSP/index.html',
-  '/TaxiDSP/manifest.json',
-  '/TaxiDSP/icon-192.png',
-  '/TaxiDSP/icon-512.png'
+  '/Taxydsp/',
+  '/Taxydsp/index.html',
+  '/Taxydsp/manifest.json',
+  '/Taxydsp/icon-192.png',
+  '/Taxydsp/icon-512.png'
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ARCHIVOS))
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS)));
   self.skipWaiting();
 });
 
