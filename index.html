@@ -691,7 +691,16 @@ input::placeholder { color: var(--gris); }
 
   <div class="desglose" id="desglose">
     <div class="sec-titulo">Desglose</div>
-    <div class="d-fila d-tar"><span class="con">TARIFA</span><span class="val" id="dTarifa">-</span></div>
+    <div class="d-fila d-tar"><span class="con">TARIFA BRUTA</span><span class="val" id="dTarifa">-</span></div>
+    <div class="d-fila" style="border-bottom:1px solid var(--verde-dim)">
+      <span class="con">COMISIÓN INDRIVER</span><span class="val" id="dComision">-</span>
+    </div>
+    <div class="d-fila" style="border-bottom:1px solid #ff3b3b33">
+      <span class="con">IVA COMISIÓN 🚨SAT</span><span class="val" id="dIva" style="color:var(--rojo)">-</span>
+    </div>
+    <div class="d-fila d-tar" style="font-size:0.8rem">
+      <span class="con">INGRESO REAL</span><span class="val" id="dIngresoReal">-</span>
+    </div>
     <div class="d-fila"><span class="con">GASOLINA</span><span class="val" id="dGas">-</span></div>
     <div class="d-fila"><span class="con">DESGASTE</span><span class="val" id="dDesgaste">-</span></div>
     <div class="d-fila"><span class="con">PERSONAL</span><span class="val" id="dPersonal">-</span></div>
@@ -954,11 +963,19 @@ function calcular() {
 
   const kmT  = kmV + kmR;
   const minT = minV + minR;
+
+  // ── COMISIÓN INDRIVER ──
+  const base      = tarifa / 1.1681;        // Base sin impuestos
+  const comision  = base * 0.1449;          // Comisión InDriver (costo)
+  const ivaComision = comision * 0.16;      // IVA (va al SAT 🚨)
+  const ingresoReal = tarifa - comision - ivaComision; // Lo que realmente recibes
+
+  // ── COSTOS DEL CARRO ──
   const cGas = (gas / rend) * kmT;
   const cDes = COSTO_FIJO_KM * kmT;
   const cPer = (per / km) * kmT;
   const cTot = cGas + cDes + cPer;
-  const neto = tarifa - cTot;
+  const neto = ingresoReal - cTot;          // Ganancia neta real
   const pct  = Math.min(Math.max((neto / tarifa) * 100, 0), 100);
   const xh   = minT > 0 ? (neto / minT) * 60 : null;
   const xkm  = kmT  > 0 ?  neto / kmT        : null;
@@ -992,11 +1009,14 @@ function calcular() {
 
   // Desglose
   $$('desglose').classList.add('visible');
-  $$('dTarifa').textContent   = '+$' + tarifa.toFixed(2);
-  $$('dGas').textContent      = '-$' + cGas.toFixed(2);
-  $$('dDesgaste').textContent = '-$' + cDes.toFixed(2);
-  $$('dPersonal').textContent = '-$' + cPer.toFixed(2);
-  $$('dTotal').textContent    = '-$' + cTot.toFixed(2);
+  $$('dTarifa').textContent     = '$' + tarifa.toFixed(2);
+  $$('dComision').textContent   = '-$' + comision.toFixed(2);
+  $$('dIva').textContent        = '-$' + ivaComision.toFixed(2);
+  $$('dIngresoReal').textContent= '+$' + ingresoReal.toFixed(2);
+  $$('dGas').textContent        = '-$' + cGas.toFixed(2);
+  $$('dDesgaste').textContent   = '-$' + cDes.toFixed(2);
+  $$('dPersonal').textContent   = '-$' + cPer.toFixed(2);
+  $$('dTotal').textContent      = '-$' + cTot.toFixed(2);
 
   const col = neto > uR ? 'var(--verde)' : neto >= 0 ? 'var(--naranja)' : 'var(--rojo)';
   $$('barraFill').style.width = pct + '%';
@@ -1007,7 +1027,7 @@ function calcular() {
   mostrarOverlay(neto, xh, col);
 
   // Guardar
-  viajes.push({ hora, ruta, tarifa, kmT, minT, cTot, neto, xh, pago, serv });
+  viajes.push({ hora, ruta, tarifa, kmT, minT, cTot, neto, xh, pago, serv, comision, ivaComision, ingresoReal });
   guardar();
   refHistorial();
   toast('GUARDADO');
@@ -1085,10 +1105,13 @@ function refHistorial() {
 function exportarCSV() {
   if (!viajes.length) { alert('No hay viajes'); return; }
   const fecha = new Date().toLocaleDateString('es-MX').replace(/\//g,'-');
-  const cab   = 'Hora,Ruta,Tarifa,KmTotal,MinTotal,Costo,Neto,$/Hora,Pago,Servicio';
+  const cab   = 'Hora,Ruta,Tarifa,Comision,IVA,IngresoReal,KmTotal,MinTotal,CostoKm,Neto,$/Hora,Pago,Servicio';
   const rows  = viajes.map(v => [
-    v.hora, '"'+v.ruta+'"', v.tarifa.toFixed(2), v.kmT.toFixed(1),
-    v.minT, v.cTot.toFixed(2), v.neto.toFixed(2),
+    v.hora, '"'+v.ruta+'"', v.tarifa.toFixed(2),
+    v.comision ? v.comision.toFixed(2) : '',
+    v.ivaComision ? v.ivaComision.toFixed(2) : '',
+    v.ingresoReal ? v.ingresoReal.toFixed(2) : '',
+    v.kmT.toFixed(1), v.minT, v.cTot.toFixed(2), v.neto.toFixed(2),
     v.xh ? v.xh.toFixed(0) : '', v.pago, v.serv
   ].join(','));
   descargarCSV([cab,...rows].join('\n'), 'indriver_'+fecha+'.csv');
